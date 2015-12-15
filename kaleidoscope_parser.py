@@ -1,6 +1,7 @@
 from AST import NumberExpression, VariableExpression, FunctionCallExpression, PrototypeNode, FunctionNode, \
     BinaryOperatorExpression
-from lexer import CharacterToken, NumberToken, IdentifierToken, EOFToken, DefToken, ExternToken
+from kaleidoscope_lexer import CharacterToken, NumberToken, IdentifierToken, EOFToken, DefToken, ExternToken, Lexer, \
+    OpenParenthesisToken, ClosedParenthesisToken
 from operators import Operators
 
 
@@ -9,14 +10,13 @@ class ParserException(Exception):
 
 
 class Parser:
-    def __init__(self, tokens):
-        self.tokens = tokens
+    def __init__(self):
+        self.tokens = None
         self.current = None
         self.operators_precendence = Operators()
-        self.next()
 
     def next(self):
-        self.current = self.tokens.next()
+        self.current = self.tokens.__next__()
 
     def parse_number_expression(self):
         """
@@ -32,7 +32,7 @@ class Parser:
         """
         self.next()  # consume '('
         contents = self.parse_expression()
-        if self.current != CharacterToken(')'):
+        if self.current != ClosedParenthesisToken:
             raise ParserException("Expected ')'")
         self.next()  # consume ')'
         return contents
@@ -66,12 +66,12 @@ class Parser:
         """
         identifier_name = self.current.name
         self.next()
-        if self.current != CharacterToken(')'):
+        if self.current != ClosedParenthesisToken():
             return VariableExpression(identifier_name)
 
         self.next()  # consume '('
         arguments = []
-        while self.current != CharacterToken(')'):
+        while self.current != ClosedParenthesisToken():
             arguments.append(self.parse_expression())
             if self.current != CharacterToken(','):
                 raise ParserException("Expected ',' or ')' in the argument list")
@@ -87,10 +87,10 @@ class Parser:
             return self.parse_identifier_expression()
         elif isinstance(self.current, NumberToken):
             return self.parse_number_expression()
-        elif isinstance(self.current, CharacterToken('(')):
+        elif self.current == OpenParenthesisToken():
             return self.parse_parenthesis_expression()
         else:
-            raise ParserException("Unknown token when parsing primary")
+            raise ParserException("Unknown token when parsing primary: " + str(self.current))
 
     def parse_prototype_expression(self):
         """
@@ -100,15 +100,16 @@ class Parser:
             raise ParserException("Expected function name in prototype")
         function_name = self.current.name
         self.next()
-        if self.current != CharacterToken('('):
+        if self.current != OpenParenthesisToken():
             raise ParserException("Expected '(' in function prototype")
         self.next()
         argument_names = []
         while isinstance(self.current, IdentifierToken):
             argument_names.append(self.current.name)
             self.next()
-        if self.current != CharacterToken(')'):
+        if self.current != ClosedParenthesisToken():
             raise ParserException("Expected ')' in function prototype")
+        self.next()
         return PrototypeNode(function_name, argument_names)
 
     def parse_definition(self):
@@ -135,11 +136,15 @@ class Parser:
         expression = self.parse_expression()
         return FunctionNode(prototype, expression)
 
-    def parse(self):
+    def parse(self, string):
         """
         top ::= definition | external | expression | EOF
         """
-        # while True:
+
+        lexer = Lexer()
+        self.tokens = lexer.tokenize(string)
+        self.next()
+
         if isinstance(self.current, EOFToken):
             pass
         elif isinstance(self.current, DefToken):
@@ -151,3 +156,22 @@ class Parser:
         else:
             print('Parsed a top-level expression.')
             return self.parse_toplevel_expression()
+
+    def _flatten(self, ast):
+        if isinstance(ast, NumberExpression):
+            return ['Number', ast.value]
+        elif isinstance(ast, VariableExpression):
+            return ['Variable', ast.name]
+        elif isinstance(ast, BinaryOperatorExpression):
+            return ['Binop', ast.operator,
+                    self._flatten(ast.left), self._flatten(ast.right)]
+        elif isinstance(ast, FunctionCallExpression):
+            args = [self._flatten(arg) for arg in ast.arguments]
+            return ['Call', ast.function, args]
+        elif isinstance(ast, PrototypeNode):
+            return ['Prototype', ast.name, ' '.join(ast.arguments)]
+        elif isinstance(ast, FunctionNode):
+            return ['Function',
+                    self._flatten(ast.prototype), self._flatten(ast.body)]
+        else:
+            raise TypeError('unknown type in _flatten: {0}'.format(type(ast)))

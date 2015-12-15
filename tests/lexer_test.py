@@ -1,7 +1,7 @@
 import unittest
 import pprint
 
-from lexer import Lexer
+from kaleidoscope_lexer import Lexer
 from tests.settings import TESTFILE
 
 

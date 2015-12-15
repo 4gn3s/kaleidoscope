@@ -1,4 +1,4 @@
-from lexer import CharacterToken
+from kaleidoscope_lexer import CharacterToken
 
 
 class Operators:

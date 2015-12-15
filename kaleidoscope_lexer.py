@@ -57,6 +57,16 @@ class CharacterToken(Token):
         return self.__class__.__name__ + " char=" + self.char
 
 
+class OpenParenthesisToken(CharacterToken):
+    def __init__(self):
+        super().__init__(char = '(')
+
+
+class ClosedParenthesisToken(CharacterToken):
+    def __init__(self):
+        super().__init__(char = ')')
+
+
 class Lexer:
     def __init__(self):
         self.regex_comment = re.compile('#.*')
