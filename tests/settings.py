@@ -1,0 +1,1 @@
+TESTFILE = 'testfile.ko'
