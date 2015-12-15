@@ -12,19 +12,19 @@ class Token:
         return str(self)
 
 
-class TokenDef(Token):
+class DefToken(Token):
     pass
 
 
-class TokenExtern(Token):
+class ExternToken(Token):
     pass
 
 
-class TokenEOF(Token):
+class EOFToken(Token):
     pass
 
 
-class TokenNumber(Token):
+class NumberToken(Token):
     def __init__(self, value):
         super().__init__()
         self.value = value
@@ -33,7 +33,7 @@ class TokenNumber(Token):
         return self.__class__.__name__ + " value=" + str(self.value)
 
 
-class TokenIdentifier(Token):
+class IdentifierToken(Token):
     def __init__(self, name):
         super().__init__()
         self.name = name
@@ -42,13 +42,13 @@ class TokenIdentifier(Token):
         return self.__class__.__name__ + " name=" + self.name
 
 
-class TokenCharacter(Token):
+class CharacterToken(Token):
     def __init__(self, char):
         super().__init__()
         self.char = char
 
     def __eq__(self, other):
-        return isinstance(other, TokenCharacter) and self.char == other.char
+        return isinstance(other, CharacterToken) and self.char == other.char
 
     def __ne__(self, other):
         return not self == other
@@ -78,19 +78,19 @@ class Lexer:
                 text = text[len(comment):]
             elif match_number:
                 number = match_number.group(0)
-                yield TokenNumber(float(number))
+                yield NumberToken(float(number))
                 text = text[len(number):]
             elif match_identifier:
                 identifier = match_identifier.group(0)
                 if identifier == 'def':
-                    yield TokenDef()
+                    yield DefToken()
                 elif identifier == 'extern':
-                    yield TokenExtern()
+                    yield ExternToken()
                 else:
-                    yield TokenIdentifier(identifier)
+                    yield IdentifierToken(identifier)
                 text = text[len(identifier):]
             else:
-                yield TokenCharacter(text[0])
+                yield CharacterToken(text[0])
                 text = text[1:]
 
-        yield TokenEOF()
+        yield EOFToken()
