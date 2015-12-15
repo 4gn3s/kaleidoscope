@@ -11,6 +11,7 @@ class Operators:
     def _operators(self):
         return {
             '<': 10,
+            '>': 10,
             '+': 20,
             '-': 20,
             '*': 40,

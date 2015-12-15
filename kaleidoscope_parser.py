@@ -71,11 +71,14 @@ class Parser:
 
         self.next()  # consume '('
         arguments = []
-        while self.current != ClosedParenthesisToken():
-            arguments.append(self.parse_expression())
-            if self.current != CharacterToken(','):
-                raise ParserException("Expected ',' or ')' in the argument list")
-            self.next()
+        if self.current != ClosedParenthesisToken():
+            while True:
+                arguments.append(self.parse_expression())
+                if self.current == ClosedParenthesisToken():
+                    break
+                if self.current != CharacterToken(','):
+                    raise ParserException("Expected ',' or ')' in the argument list")
+                self.next()
         self.next()  # consume ')'
         return FunctionCallExpression(identifier_name, arguments)
 
