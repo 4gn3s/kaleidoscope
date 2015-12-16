@@ -26,3 +26,7 @@ class TestEvaluator(unittest.TestCase):
         self.assertIsNone(self.evaluator.evaluate('extern floor(x)'))
         self.assertIsNone(self.evaluator.evaluate("def eadder(x y) ceil(x) + floor(y)"))
         self.assertEqual(self.evaluator.evaluate("eadder(5.5, 4.2)"), 10.0)
+
+    def test_parenthesis(self):
+        self.assertIsNone(self.evaluator.evaluate("def testfun(x) (1+2+x)*(x+(1+2))"))
+        self.assertEqual(self.evaluator.evaluate("testfun(5)"), 64.0)

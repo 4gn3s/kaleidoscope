@@ -23,6 +23,7 @@ class Evaluator:
         if not (isinstance(ast, FunctionNode) and ast.is_anonymous()):
             return None
 
+        print(str(self.generator.module))
         llvm_mod = llvm.parse_assembly(str(self.generator.module))
         target_machine = self.target.create_target_machine()
         with llvm.create_mcjit_compiler(llvm_mod, target_machine) as ee:
