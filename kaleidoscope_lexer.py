@@ -36,6 +36,14 @@ class ElseToken(Token):
     pass
 
 
+class ForToken(Token):
+    pass
+
+
+class InToken(Token):
+    pass
+
+
 class NumberToken(Token):
     def __init__(self, value):
         super().__init__()
@@ -79,6 +87,16 @@ class ClosedParenthesisToken(CharacterToken):
         super().__init__(char=')')
 
 
+class AssignToken(CharacterToken):
+    def __init__(self):
+        super().__init__(char='=')
+
+
+class CommaToken(CharacterToken):
+    def __init__(self):
+        super().__init__(char=',')
+
+
 class Lexer:
     def __init__(self):
         self.regex_comment = re.compile('#.*')
@@ -114,6 +132,10 @@ class Lexer:
                     yield ThenToken()
                 elif identifier == 'else':
                     yield ElseToken()
+                elif identifier == 'for':
+                    yield ForToken()
+                elif identifier == 'in':
+                    yield InToken()
                 else:
                     yield IdentifierToken(identifier)
                 text = text[len(identifier):]

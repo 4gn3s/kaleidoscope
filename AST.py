@@ -36,6 +36,15 @@ class IfExpression(ExpressionNode):
         self.else_branch = else_branch
 
 
+class ForExpression(ExpressionNode):
+    def __init__(self, variable, start, end, step, body):
+        self.variable = variable
+        self.start = start
+        self.end = end
+        self.step = step
+        self.body = body
+
+
 class PrototypeNode(Node):
     def __init__(self, name, arguments):
         self.name = name

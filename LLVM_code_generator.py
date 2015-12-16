@@ -58,6 +58,49 @@ class LLVMGenerator:
         phi.add_incoming(else_branch, else_bb)
         return phi
 
+    def generate_for_expression(self, node):
+        start = self.generate(node.start)
+        preheader_bb = self.builder.block
+        loop_bb = self.builder.function.append_basic_block('loop')
+
+        self.builder.branch(loop_bb)
+        self.builder.position_at_start(loop_bb)
+
+        phi = self.builder.phi(ir.DoubleType(), node.variable)
+        phi.add_incoming(start, preheader_bb)
+
+        oldval = self.symbol_table.get(node.variable)
+        self.symbol_table[node.variable] = phi
+
+        # this value will be ignored
+        body = self.generate(node.body)
+
+        if node.step is None:
+            step = ir.Constant(ir.DoubleType(), 1.0)
+        else:
+            step = self.generate(node.step)
+        next_var = self.builder.fadd(phi, step, 'nextvar')
+
+        end = self.generate(node.end)
+        cmp = self.builder.fcmp_ordered(
+            '!=', end, ir.Constant(ir.DoubleType(), 0.0),
+            'loopcond')
+
+        loop_end_bb = self.builder.block
+        after_bb = self.builder.function.append_basic_block('afterloop')
+
+        self.builder.cbranch(cmp, loop_bb, after_bb)
+        self.builder.position_at_start(after_bb)
+        phi.add_incoming(next_var, loop_end_bb)
+
+        if oldval is None:
+            del self.symbol_table[node.variable]
+        else:
+            self.symbol_table[node.variable] = oldval
+
+        # return 0
+        return ir.Constant(ir.DoubleType(), 0.0)
+
     def generate_binary_operator_expression(self, node):
         left = self.generate(node.left)
         right = self.generate(node.right)

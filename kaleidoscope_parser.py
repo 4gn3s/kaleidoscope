@@ -1,7 +1,8 @@
 from AST import NumberExpression, VariableExpression, FunctionCallExpression, PrototypeNode, FunctionNode, \
-    BinaryOperatorExpression, IfExpression
+    BinaryOperatorExpression, IfExpression, ForExpression
 from kaleidoscope_lexer import CharacterToken, NumberToken, IdentifierToken, EOFToken, DefToken, ExternToken, Lexer, \
-    OpenParenthesisToken, ClosedParenthesisToken, IfToken, ThenToken, ElseToken
+    OpenParenthesisToken, ClosedParenthesisToken, IfToken, ThenToken, ElseToken, ForToken, AssignToken, CommaToken, \
+    InToken
 from operators import Operators
 
 
@@ -76,6 +77,40 @@ class Parser:
         else_expression = self.parse_expression()
         return IfExpression(condition, then_expression, else_expression)
 
+    def parse_for_expression(self):
+        """
+        forexpr ::= 'for' identifier '=' expr ',' expr (',' expr)? 'in' expression
+        """
+        self.next()
+        if not isinstance(self.current, IdentifierToken):
+            raise ParserException("Expected identifier after 'for', got " + str(self.current))
+
+        loop_variable = self.current.name
+        self.next()
+        if self.current != AssignToken():
+            raise ParserException("Expected '=' after variable in for, got " + str(self.current))
+        self.next()
+        start = self.parse_expression()
+
+        if self.current != CommaToken():
+            raise ParserException("Expected ',' after variable start value in for, got " + str(self.current))
+        self.next()
+
+        end = self.parse_expression()
+
+        if self.current == CommaToken():
+            self.next()
+            step = self.parse_expression()
+        else:
+            step = None
+
+        if not isinstance(self.current, InToken):
+            raise ParserException("Expected 'in' after the loop, got " + str(self.current))
+        self.next()
+
+        body = self.parse_expression()
+        return ForExpression(loop_variable, start, end, step, body)
+
     def parse_identifier_expression(self):
         """
         identifierexpr ::= identifier | identifier '(' expression* ')'
@@ -92,7 +127,7 @@ class Parser:
                 arguments.append(self.parse_expression())
                 if self.current == ClosedParenthesisToken():
                     break
-                if self.current != CharacterToken(','):
+                if self.current != CommaToken():
                     raise ParserException("Expected ',' or ')' in the argument list")
                 self.next()
         self.next()  # consume ')'
@@ -100,7 +135,7 @@ class Parser:
 
     def parse_primary_expression(self):
         """
-        primary ::= identifierexpr | numberexpr | parenexpr | ifexpression
+        primary ::= identifierexpr | numberexpr | parenexpr | ifexpression | forexpression
         """
         if isinstance(self.current, IdentifierToken):
             return self.parse_identifier_expression()
@@ -108,6 +143,8 @@ class Parser:
             return self.parse_number_expression()
         elif isinstance(self.current, IfToken):
             return self.parse_if_expression()
+        elif isinstance(self.current, ForToken):
+            return self.parse_for_expression()
         elif self.current == OpenParenthesisToken():
             return self.parse_parenthesis_expression()
         else:
