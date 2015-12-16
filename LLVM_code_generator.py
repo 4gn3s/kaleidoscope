@@ -62,7 +62,6 @@ class LLVMGenerator:
     def generate_prototype_node(self, node):
         function = node.name
         func_ty = ir.FunctionType(ir.DoubleType(), [ir.DoubleType()] * len(node.arguments))
-        func = None
         if function in self.module.globals:
             existing_func = self.module.globals[function]
             if not isinstance(existing_func, ir.Function):
@@ -85,6 +84,6 @@ class LLVMGenerator:
         func = self.generate(node.prototype)
         bb_entry = func.append_basic_block('entry')
         self.builder = ir.IRBuilder(bb_entry)
-        retval = self.generate(node.body)
-        self.builder.ret(retval)
+        return_value = self.generate(node.body)
+        self.builder.ret(return_value)
         return func

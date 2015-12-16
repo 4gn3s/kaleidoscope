@@ -59,12 +59,12 @@ class CharacterToken(Token):
 
 class OpenParenthesisToken(CharacterToken):
     def __init__(self):
-        super().__init__(char = '(')
+        super().__init__(char='(')
 
 
 class ClosedParenthesisToken(CharacterToken):
     def __init__(self):
-        super().__init__(char = ')')
+        super().__init__(char=')')
 
 
 class Lexer:
