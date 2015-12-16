@@ -30,3 +30,8 @@ class TestEvaluator(unittest.TestCase):
     def test_parenthesis(self):
         self.assertIsNone(self.evaluator.evaluate("def testfun(x) (1+2+x)*(x+(1+2))"))
         self.assertEqual(self.evaluator.evaluate("testfun(5)"), 64.0)
+
+    def test_multiple_evaluates(self):
+        self.assertIsNone(self.evaluator.evaluate("def adder(x y) x+y"))
+        self.assertIsNone(self.evaluator.evaluate("def testfun(x) (1+2+x)*(x+(1+2))"))
+        self.assertEqual(self.evaluator.evaluate("testfun(adder(1, 2)*3)"), 144.0)
