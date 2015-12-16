@@ -16,7 +16,7 @@ class Parser:
         self.operators_precendence = Operators()
 
     def next(self):
-        self.current = self.tokens.__next__()
+        self.current = next(self.tokens)
 
     def parse_number_expression(self):
         """
@@ -66,7 +66,7 @@ class Parser:
         """
         identifier_name = self.current.name
         self.next()
-        if self.current != ClosedParenthesisToken():
+        if self.current != OpenParenthesisToken():
             return VariableExpression(identifier_name)
 
         self.next()  # consume '('
@@ -135,9 +135,8 @@ class Parser:
         """
         toplevelexpr ::= expression
         """
-        prototype = PrototypeNode('', [])
         expression = self.parse_expression()
-        return FunctionNode(prototype, expression)
+        return FunctionNode.create_anonymous(expression)
 
     def parse(self, string):
         """

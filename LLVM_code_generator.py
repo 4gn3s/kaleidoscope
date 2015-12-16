@@ -15,8 +15,11 @@ class LLVMGenerator:
         self.builder = None
         self.symbol_table = {}
 
-    def generate(self, node):
+    def generate_llvm(self, node):
         assert isinstance(node, (PrototypeNode, FunctionNode))
+        return self.generate(node)
+
+    def generate(self, node):
         method = 'generate' + re.sub('([A-Z]+)', r'_\1', node.__class__.__name__).lower()
         return getattr(self, method)(node)
 
@@ -33,7 +36,7 @@ class LLVMGenerator:
         if node.operator == '+':
             return self.builder.fadd(left, right, 'addtmp')
         elif node.operator == '-':
-            return self.builder.fsum(left, right, 'subtmp')
+            return self.builder.fsub(left, right, 'subtmp')
         elif node.operator == '*':
             return self.builder.fmul(left, right, 'multmp')
         elif node.operator == '/':

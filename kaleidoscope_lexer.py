@@ -70,7 +70,7 @@ class ClosedParenthesisToken(CharacterToken):
 class Lexer:
     def __init__(self):
         self.regex_comment = re.compile('#.*')
-        self.regex_number = re.compile('[0-9]+(?:.[0-9]+)?')
+        self.regex_number = re.compile('(\d+(\.\d*)?|\.\d+)([eE]\d+)?')
         self.regex_identifier = re.compile('[a-zA-Z][a-zA-Z0-9]*')
 
     def tokenize(self, text):

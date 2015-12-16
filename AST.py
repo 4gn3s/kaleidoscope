@@ -39,3 +39,16 @@ class FunctionNode(Node):
     def __init__(self, prototype, body):
         self.prototype = prototype
         self.body = body
+
+    _anonymous_counter = 0
+
+    @classmethod
+    def create_anonymous(cls, expression):
+        cls._anonymous_counter += 1
+        return cls(
+                PrototypeNode('anonymous_{0}'.format(cls._anonymous_counter), []),
+                expression
+        )
+
+    def is_anonymous(self):
+        return "anonymous" in self.prototype.name

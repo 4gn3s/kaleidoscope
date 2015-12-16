@@ -20,7 +20,7 @@ class TestParser(unittest.TestCase):
         self.assertIsInstance(ast, FunctionNode)
         self.assertIsInstance(ast.body, BinaryOperatorExpression)
         self.assertEqual(self.parser._flatten(ast),
-                         ['Function', ['Prototype', '', ''],
+                         ['Function', ['Prototype', 'anonymous_2', ''],
                           ['Binop', '+', ['Variable', 'x'],
                            ['Binop', '*', ['Variable', 'y'], ['Variable', 'z']]]])
         print(self.parser._flatten(ast))
