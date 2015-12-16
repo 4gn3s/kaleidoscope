@@ -32,8 +32,8 @@ class Parser:
         """
         self.next()  # consume '('
         contents = self.parse_expression()
-        if self.current != ClosedParenthesisToken:
-            raise ParserException("Expected ')'")
+        if self.current != ClosedParenthesisToken():
+            raise ParserException("Expected ')', got " + str(self.current))
         self.next()  # consume ')'
         return contents
 
