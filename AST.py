@@ -29,6 +29,13 @@ class FunctionCallExpression(ExpressionNode):
         self.arguments = arguments
 
 
+class IfExpression(ExpressionNode):
+    def __init__(self, condition, then_branch, else_branch):
+        self.condition = condition
+        self.then_branch = then_branch
+        self.else_branch = else_branch
+
+
 class PrototypeNode(Node):
     def __init__(self, name, arguments):
         self.name = name

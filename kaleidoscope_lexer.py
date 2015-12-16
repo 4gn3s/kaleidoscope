@@ -24,6 +24,18 @@ class EOFToken(Token):
     pass
 
 
+class IfToken(Token):
+    pass
+
+
+class ThenToken(Token):
+    pass
+
+
+class ElseToken(Token):
+    pass
+
+
 class NumberToken(Token):
     def __init__(self, value):
         super().__init__()
@@ -96,6 +108,12 @@ class Lexer:
                     yield DefToken()
                 elif identifier == 'extern':
                     yield ExternToken()
+                elif identifier == 'if':
+                    yield IfToken()
+                elif identifier == 'then':
+                    yield ThenToken()
+                elif identifier == 'else':
+                    yield ElseToken()
                 else:
                     yield IdentifierToken(identifier)
                 text = text[len(identifier):]

@@ -1,7 +1,7 @@
 from AST import NumberExpression, VariableExpression, FunctionCallExpression, PrototypeNode, FunctionNode, \
-    BinaryOperatorExpression
+    BinaryOperatorExpression, IfExpression
 from kaleidoscope_lexer import CharacterToken, NumberToken, IdentifierToken, EOFToken, DefToken, ExternToken, Lexer, \
-    OpenParenthesisToken, ClosedParenthesisToken
+    OpenParenthesisToken, ClosedParenthesisToken, IfToken, ThenToken, ElseToken
 from operators import Operators
 
 
@@ -60,6 +60,22 @@ class Parser:
                 right = self.parse_binary_op(right, precedence + 1)
             left = BinaryOperatorExpression(operator, left, right)
 
+    def parse_if_expression(self):
+        """
+        ifexpr ::= 'if' expression 'then' expression 'else' expression
+        """
+        self.next()
+        condition = self.parse_expression()
+        if not isinstance(self.current, ThenToken):
+            raise ParserException("Expected 'then' after if, got " + str(self.current))
+        self.next()
+        then_expression = self.parse_expression()
+        if not isinstance(self.current, ElseToken):
+            raise ParserException("Expected 'else' after if, got " + str(self.current))
+        self.next()
+        else_expression = self.parse_expression()
+        return IfExpression(condition, then_expression, else_expression)
+
     def parse_identifier_expression(self):
         """
         identifierexpr ::= identifier | identifier '(' expression* ')'
@@ -84,12 +100,14 @@ class Parser:
 
     def parse_primary_expression(self):
         """
-        primary ::= identifierexpr | numberexpr | parenexpr
+        primary ::= identifierexpr | numberexpr | parenexpr | ifexpression
         """
         if isinstance(self.current, IdentifierToken):
             return self.parse_identifier_expression()
         elif isinstance(self.current, NumberToken):
             return self.parse_number_expression()
+        elif isinstance(self.current, IfToken):
+            return self.parse_if_expression()
         elif self.current == OpenParenthesisToken():
             return self.parse_parenthesis_expression()
         else:

@@ -29,6 +29,35 @@ class LLVMGenerator:
     def generate_variable_expression(self, node):
         return self.symbol_table[node.name]
 
+    def generate_if_expression(self, node):
+        conditional = self.generate(node.condition)
+        cmp = self.builder.fcmp_ordered(
+            '!=', conditional, ir.Constant(ir.DoubleType(), 0.0))
+
+        # conditional branch to either then_bb or else_bb depending on cmp
+        then_bb = self.builder.function.append_basic_block('then')
+        else_bb = ir.Block(self.builder.function, 'else')
+        merge_bb = ir.Block(self.builder.function, 'ifcont')
+        self.builder.cbranch(cmp, then_bb, else_bb)
+
+        self.builder.position_at_start(then_bb)
+        then_branch = self.generate(node.then_branch)
+        self.builder.branch(merge_bb)
+
+        then_bb = self.builder.block
+        self.builder.function.basic_blocks.append(else_bb)
+
+        self.builder.position_at_start(else_bb)
+        else_branch = self.generate(node.else_branch)
+        self.builder.branch(merge_bb)
+
+        self.builder.function.basic_blocks.append(merge_bb)
+        self.builder.position_at_start(merge_bb)
+        phi = self.builder.phi(ir.DoubleType(), 'iftmp')
+        phi.add_incoming(then_branch, then_bb)
+        phi.add_incoming(else_branch, else_bb)
+        return phi
+
     def generate_binary_operator_expression(self, node):
         left = self.generate(node.left)
         right = self.generate(node.right)

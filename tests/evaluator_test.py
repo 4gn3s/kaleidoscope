@@ -35,3 +35,10 @@ class TestEvaluator(unittest.TestCase):
         self.assertIsNone(self.evaluator.evaluate("def adder(x y) x+y"))
         self.assertIsNone(self.evaluator.evaluate("def testfun(x) (1+2+x)*(x+(1+2))"))
         self.assertEqual(self.evaluator.evaluate("testfun(adder(1, 2)*3)"), 144.0)
+
+    def test_if_else(self):
+        self.assertIsNone(self.evaluator.evaluate("def foo() 1+3"))
+        self.assertIsNone(self.evaluator.evaluate("def bar() 25"))
+        self.assertIsNone(self.evaluator.evaluate("def baz(x) if x then foo() else bar()"))
+        self.assertEqual(self.evaluator.evaluate("baz(1<2)"), 4.0)
+        self.assertEqual(self.evaluator.evaluate("baz(1>2)"), 25.0)
